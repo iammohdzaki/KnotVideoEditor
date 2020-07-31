@@ -15,29 +15,38 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg
+import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.zaki.knotvideoeditor.R
+import com.zaki.knotvideoeditor.fragments.adapter.FeaturesAdapter
 import com.zaki.knotvideoeditor.utils.Constants
 import com.zaki.knotvideoeditor.utils.KnotUtils
 import com.zaki.knotvideoeditor.utils.PermissionHelper
 import com.zaki.knotvideoeditor.utils.PermissionHelper.callPermissionSettings
 import com.zaki.knotvideoeditor.utils.VideoFrom
+import com.zaki.knotvideoeditor.utils.interfaces.FFMpegCallback
+import com.zaki.knotvideoeditor.utils.interfaces.OnFeaturesClickListener
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import java.io.File
+import java.util.ArrayList
 
-class MainFragment : Fragment(), View.OnClickListener {
+class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,FFMpegCallback,BaseCreatorDialogFragment.CallBacks{
     private var videoFile: File? = null
     private var videoUri: Uri? = null
     private var masterVideoFile: File? = null
     private var tagName: String = MainFragment::class.java.simpleName
     private var ePlayer: PlayerView? = null
     private var exoPlayer: SimpleExoPlayer? = null
-
+    private var videoOptions: ArrayList<String> = ArrayList()
 
 
     override fun onCreateView(
@@ -51,9 +60,51 @@ class MainFragment : Fragment(), View.OnClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ePlayer = view?.findViewById(R.id.ePlayer)
+
+        //load FFmpeg
+        try {
+            FFmpeg.getInstance(activity).loadBinary(object : FFmpegLoadBinaryResponseHandler {
+                override fun onFailure() {
+                    Log.v("FFMpeg", "Failed to load FFMpeg library.")
+                }
+
+                override fun onSuccess() {
+                    Log.v("FFMpeg", "FFMpeg Library loaded!")
+                }
+
+                override fun onStart() {
+                    Log.v("FFMpeg", "FFMpeg Started")
+                }
+
+                override fun onFinish() {
+                    Log.v("FFMpeg", "FFMpeg Stopped")
+                }
+            })
+        } catch (e: FFmpegNotSupportedException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         view.ivCamera.setOnClickListener(this)
         view.ivGallery.setOnClickListener(this)
+        setFeatures()
     }
+
+    private fun setFeatures(){
+        videoOptions.add(Constants.TRIM)
+        videoOptions.add(Constants.MUSIC)
+        videoOptions.add(Constants.PLAYBACK)
+        videoOptions.add(Constants.TEXT)
+        videoOptions.add(Constants.OBJECT)
+        videoOptions.add(Constants.MERGE)
+
+        rvVideoOptions.apply {
+            layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
+            adapter = FeaturesAdapter(videoOptions,context,this@MainFragment)
+        }
+    }
+
 
     override fun onClick(view: View?) {
         when (view?.id) {
@@ -62,6 +113,23 @@ class MainFragment : Fragment(), View.OnClickListener {
             }
             ivGallery.id -> {
                 openGallery(Constants.PERMISSION_STORAGE)
+            }
+        }
+    }
+
+    override fun videoOptions(option: String) {
+        when(option){
+            Constants.TRIM -> {
+                masterVideoFile?.let {file ->
+                    val trimFragment = VideoTrimFragment()
+                    trimFragment.setHelper(this@MainFragment)
+                    trimFragment.setFilePathFromSource(file, exoPlayer?.duration!!)
+                    showBottomSheetDialogFragment(trimFragment)
+                }
+
+                if (masterVideoFile == null) {
+                    Toast.makeText(context,getString(R.string.error_crop),Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -296,6 +364,64 @@ class MainFragment : Fragment(), View.OnClickListener {
                 // Paused by app.
             }
         }
+    }
+
+    override fun onProgress(progress: String) {
+
+    }
+
+    override fun onFailure(error: Exception) {
+
+    }
+
+    override fun onFinish() {
+
+    }
+
+    override fun onNotAvailable(error: Exception) {
+
+    }
+
+    override fun onSuccess(convertedFile: File, type: String) {
+
+    }
+
+    override fun onDidNothing() {
+
+    }
+
+    override fun onFileProcessed(file: File) {
+
+    }
+
+    override fun getFile(): File? {
+        return File("")
+    }
+
+    override fun reInitPlayer() {
+
+    }
+
+    override fun onAudioFileProcessed(convertedAudioFile: File) {
+
+    }
+
+    override fun showLoading(isShow: Boolean) {
+
+    }
+
+    override fun openGallery() {
+
+    }
+
+    override fun openCamera() {
+
+    }
+
+    private fun showBottomSheetDialogFragment(bottomSheetDialogFragment: BottomSheetDialogFragment) {
+        val bundle = Bundle()
+        bottomSheetDialogFragment.arguments = bundle
+        bottomSheetDialogFragment.show(fragmentManager!!, bottomSheetDialogFragment.tag)
     }
 
 }

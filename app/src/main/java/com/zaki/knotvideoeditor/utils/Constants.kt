@@ -7,7 +7,7 @@ import android.Manifest
  * Created On : 30-07-2020
  */
 
-object Constants {
+public object Constants {
 
     const val APP_NAME="KnotVideoEditor"
     const val VIDEO_FLIRT = 1

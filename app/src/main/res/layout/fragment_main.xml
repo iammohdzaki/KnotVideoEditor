@@ -3,11 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <include layout="@layout/toolbar_common"
+            android:id="@+id/llHeader" />
 
 
         <com.google.android.exoplayer2.ui.PlayerView
@@ -18,7 +22,7 @@
             app:controller_layout_id="@layout/exo_playback_control_view"
             app:surface_type="surface_view"
             app:use_controller="false"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/llHeader"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvVideoOptions"

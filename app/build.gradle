@@ -42,6 +42,20 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation 'com.google.android.material:material:1.0.0'
+
+    //ffmpeg
+    implementation "com.writingminds:FFmpegAndroid:${FFmpeg}"
+    implementation "org.jcodec:jcodec-android:${jcodec}"
+
+
+
+    //seekbar
+    implementation "com.github.guilhe:seekbar-ranged-view:${seekbar}"
+
+    //textSize
+    implementation "com.intuit.sdp:sdp-android:${sdpSize}"
+
     //exoplayer
     implementation "com.google.android.exoplayer:exoplayer-core:${exoPlayerCore}"
     implementation "com.google.android.exoplayer:exoplayer-dash:${exoPlayer}"

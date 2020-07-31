@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.upstream.FileDataSource
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Developer : Mohammad Zaki
@@ -21,6 +22,16 @@ import java.util.*
  */
 
 object KnotUtils {
+
+    fun secToTime(totalSeconds: Long): String {
+        return String.format(
+            "%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(totalSeconds),
+            TimeUnit.MILLISECONDS.toMinutes(totalSeconds) -
+                    TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(totalSeconds)), // The change is in this line
+            TimeUnit.MILLISECONDS.toSeconds(totalSeconds) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(totalSeconds))
+        )
+    }
 
     fun createVideoFile(context: Context): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
