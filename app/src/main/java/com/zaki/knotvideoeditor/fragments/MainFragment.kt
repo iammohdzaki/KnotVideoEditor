@@ -105,8 +105,8 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
 
     private fun setFeatures(){
         videoOptions.add(Constants.TRIM)
-        /*videoOptions.add(Constants.MUSIC)
         videoOptions.add(Constants.PLAYBACK)
+        /*videoOptions.add(Constants.MUSIC)
         videoOptions.add(Constants.TEXT)
         videoOptions.add(Constants.OBJECT)*/
         videoOptions.add(Constants.MERGE)
@@ -175,7 +175,25 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
             Constants.MERGE -> {
                 MergeVideoFragment.newInstance().apply {
                     setHelper(this@MainFragment)
-                }.show(fragmentManager!!, "OptiMergeFragment")
+                }.show(fragmentManager!!, "MergeFragment")
+            }
+            Constants.PLAYBACK -> {
+                masterVideoFile?.let { file ->
+                    releasePlayer()
+
+                    PlaybackDialogFragment.newInstance().apply {
+                        setHelper(this@MainFragment)
+                        setFilePathFromSource(file)
+                    }.show(fragmentManager!!, "PlaybackSpeedDialogFragment")
+                }
+
+                if (masterVideoFile == null) {
+                   Toast.makeText(
+                        activity!!,
+                        getString(R.string.error_speed),
+                       Toast.LENGTH_LONG
+                    ).show()
+                }
             }
 
         }

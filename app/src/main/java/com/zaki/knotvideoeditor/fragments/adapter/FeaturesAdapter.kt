@@ -36,34 +36,42 @@ class FeaturesAdapter(
                 when(videoOptions[position]){
                     Constants.FLIRT -> {
                         iv_option.setImageResource(R.drawable.video_conference_24)
+                        tvName.text = Constants.FLIRT
                     }
 
                     Constants.TRIM -> {
                         iv_option.setImageResource(R.drawable.video_trimming_24)
+                        tvName.text = Constants.TRIM
                     }
 
                     Constants.MUSIC -> {
                         iv_option.setImageResource(R.drawable.music_video_24)
+                        tvName.text = Constants.MUSIC
                     }
 
                     Constants.PLAYBACK -> {
                         iv_option.setImageResource(R.drawable.speed_skating_24)
+                        tvName.text = Constants.PLAYBACK
                     }
 
                     Constants.TEXT -> {
                         iv_option.setImageResource(R.drawable.text_width_24)
+                        tvName.text = Constants.TEXT
                     }
 
                     Constants.OBJECT -> {
                         iv_option.setImageResource(R.drawable.sticker_24)
+                        tvName.text = Constants.OBJECT
                     }
 
                     Constants.MERGE -> {
                         iv_option.setImageResource(R.drawable.merge_vertical_24)
+                        tvName.text = Constants.MERGE
                     }
 
                     Constants.TRANSITION -> {
                         iv_option.setImageResource(R.drawable.transition_24)
+                        tvName.text = Constants.TRANSITION
                     }
                 }
 

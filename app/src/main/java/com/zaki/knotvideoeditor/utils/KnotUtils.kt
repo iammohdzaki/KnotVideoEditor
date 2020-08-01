@@ -3,6 +3,7 @@ package com.zaki.knotvideoeditor.utils
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
 import com.google.android.exoplayer2.source.ExtractorMediaSource
@@ -24,7 +25,16 @@ import java.util.concurrent.TimeUnit
 
 object KnotUtils {
 
+    fun isVideoHaveAudioTrack(path: String): Boolean {
+        var audioTrack = false
 
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(path)
+        val hasAudioStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)
+        audioTrack = hasAudioStr == "yes"
+
+        return audioTrack
+    }
 
     //copy file from one source file to destination file
     @Throws(IOException::class)
