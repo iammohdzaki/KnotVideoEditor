@@ -48,7 +48,8 @@ dependencies {
     implementation "com.writingminds:FFmpegAndroid:${FFmpeg}"
     implementation "org.jcodec:jcodec-android:${jcodec}"
 
-
+    //fresco
+    implementation "com.facebook.fresco:fresco:${fresco}"
 
     //seekbar
     implementation "com.github.guilhe:seekbar-ranged-view:${seekbar}"

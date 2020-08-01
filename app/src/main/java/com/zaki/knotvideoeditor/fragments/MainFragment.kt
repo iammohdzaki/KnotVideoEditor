@@ -105,10 +105,10 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
 
     private fun setFeatures(){
         videoOptions.add(Constants.TRIM)
-        videoOptions.add(Constants.MUSIC)
+        /*videoOptions.add(Constants.MUSIC)
         videoOptions.add(Constants.PLAYBACK)
         videoOptions.add(Constants.TEXT)
-        videoOptions.add(Constants.OBJECT)
+        videoOptions.add(Constants.OBJECT)*/
         videoOptions.add(Constants.MERGE)
 
         rvVideoOptions.apply {
@@ -172,6 +172,12 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
                     Toast.makeText(context,getString(R.string.error_crop),Toast.LENGTH_LONG).show()
                 }
             }
+            Constants.MERGE -> {
+                MergeVideoFragment.newInstance().apply {
+                    setHelper(this@MainFragment)
+                }.show(fragmentManager!!, "OptiMergeFragment")
+            }
+
         }
     }
 
@@ -190,7 +196,7 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
             Log.v(tagName, "videoPath1: " + videoFile!!.absolutePath)
             videoUri = FileProvider.getUriForFile(
                 context!!,
-                "com.obs.marveleditor.provider", videoFile!!
+                "com.zaki.knotvideoeditor.provider", videoFile!!
             )
             cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240) //4 minutes
             cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
