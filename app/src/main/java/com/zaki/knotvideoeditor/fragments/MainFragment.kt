@@ -2,10 +2,13 @@ package com.zaki.knotvideoeditor.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -36,8 +39,11 @@ import com.zaki.knotvideoeditor.utils.interfaces.FFMpegCallback
 import com.zaki.knotvideoeditor.utils.interfaces.OnFeaturesClickListener
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import kotlinx.android.synthetic.main.toolbar_common.*
+import kotlinx.android.synthetic.main.toolbar_common.view.*
 import java.io.File
-import java.util.ArrayList
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,FFMpegCallback,BaseCreatorDialogFragment.CallBacks{
     private var videoFile: File? = null
@@ -47,6 +53,8 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
     private var ePlayer: PlayerView? = null
     private var exoPlayer: SimpleExoPlayer? = null
     private var videoOptions: ArrayList<String> = ArrayList()
+    private var builder: AlertDialog.Builder ?= null
+    var dialog: Dialog ?= null
 
 
     override fun onCreateView(
@@ -85,9 +93,13 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        builder = AlertDialog.Builder(activity)
+        builder!!.setView(R.layout.progress)
+        dialog = builder!!.create()
 
         view.ivCamera.setOnClickListener(this)
         view.ivGallery.setOnClickListener(this)
+        view.ivRightImage.setOnClickListener(this)
         setFeatures()
     }
 
@@ -114,7 +126,36 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
             ivGallery.id -> {
                 openGallery(Constants.PERMISSION_STORAGE)
             }
+            ivRightImage.id -> {
+                AlertDialog.Builder(context!!)
+                    .setTitle(Constants.APP_NAME)
+                    .setMessage(getString(R.string.save_video))
+                    .setPositiveButton(getString(R.string.Continue)) { _, _ ->
+                        if (masterVideoFile != null) {
+                            val outputFile = createSaveVideoFile()
+                            KnotUtils.copyFile(masterVideoFile, outputFile)
+                            Toast.makeText(context, R.string.successfully_saved, Toast.LENGTH_SHORT).show()
+                            KnotUtils.refreshGallery(outputFile.absolutePath, context!!)
+                            //ivRightImage!!.visibility = View.GONE
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel) { _, _ -> }
+                    .show()
+            }
         }
+    }
+
+    private fun createSaveVideoFile(): File {
+        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(Date())
+        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+
+        val path =
+            Environment.getExternalStorageDirectory().toString() + File.separator + Constants.APP_NAME + File.separator + Constants.MY_VIDEOS + File.separator
+        val folder = File(path)
+        if (!folder.exists())
+            folder.mkdirs()
+
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, folder)
     }
 
     override fun videoOptions(option: String) {
@@ -162,7 +203,7 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
         checkPermission(Constants.VIDEO_GALLERY, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
-    fun checkPermission(requestCode: Int, permission: String) {
+    private fun checkPermission(requestCode: Int, permission: String) {
         requestPermissions(arrayOf(permission), requestCode)
     }
 
@@ -288,6 +329,9 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
     private fun initializePlayer() {
         try{
 
+            if(exoPlayer != null){
+                exoPlayer?.release()
+            }
             ePlayer?.useController = true
             exoPlayer = ExoPlayerFactory.newSimpleInstance(
                 activity,
@@ -311,11 +355,12 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        releasePlayer()
+    }
     private fun releasePlayer() {
         if (exoPlayer != null) {
-            /*playbackPosition = exoPlayer?.currentPosition!!
-            currentWindow = exoPlayer?.currentWindowIndex!!
-            playWhenReady = exoPlayer?.playWhenReady*/
             exoPlayer?.release()
             exoPlayer = null
         }
@@ -367,31 +412,38 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
     }
 
     override fun onProgress(progress: String) {
-
+        Log.v(tagName, "onProgress()")
+        showLoading(true)
     }
 
     override fun onFailure(error: Exception) {
-
+        Log.v(tagName, "onFailure() ${error.localizedMessage}")
+        Toast.makeText(context, "Video processing failed", Toast.LENGTH_LONG).show()
+        showLoading(false)
     }
 
     override fun onFinish() {
-
+        Log.v(tagName, "onFinish()")
+        showLoading(false)
     }
 
     override fun onNotAvailable(error: Exception) {
-
+        Log.v(tagName, "onNotAvailable() ${error.localizedMessage}")
     }
 
     override fun onSuccess(convertedFile: File, type: String) {
-
+        Log.v(tagName, "onSuccess()")
+        showLoading(false)
+        onFileProcessed(convertedFile)
     }
 
     override fun onDidNothing() {
-
+        initializePlayer()
     }
 
     override fun onFileProcessed(file: File) {
-
+        masterVideoFile = file
+        initializePlayer()
     }
 
     override fun getFile(): File? {
@@ -399,7 +451,7 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
     }
 
     override fun reInitPlayer() {
-
+        initializePlayer()
     }
 
     override fun onAudioFileProcessed(convertedAudioFile: File) {
@@ -407,15 +459,23 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
     }
 
     override fun showLoading(isShow: Boolean) {
+        if (isShow)
+            dialog!!.show()
+        else {
+            if (dialog!!.isShowing)
+            dialog!!.dismiss()
+        }
 
     }
 
     override fun openGallery() {
-
+        releasePlayer()
+        checkPermission(Constants.VIDEO_GALLERY, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     override fun openCamera() {
-
+        releasePlayer()
+        openCamera(Constants.PERMISSION_CAMERA)
     }
 
     private fun showBottomSheetDialogFragment(bottomSheetDialogFragment: BottomSheetDialogFragment) {
@@ -423,5 +483,6 @@ class MainFragment : Fragment(), View.OnClickListener,OnFeaturesClickListener ,F
         bottomSheetDialogFragment.arguments = bundle
         bottomSheetDialogFragment.show(fragmentManager!!, bottomSheetDialogFragment.tag)
     }
+
 
 }

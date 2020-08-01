@@ -12,6 +12,8 @@ import android.widget.Toast
 import com.github.guilhe.views.SeekBarRangedView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.zaki.knotvideoeditor.R
+import com.zaki.knotvideoeditor.editor.VideoEditor
+import com.zaki.knotvideoeditor.utils.Constants
 import com.zaki.knotvideoeditor.utils.KnotUtils
 import com.zaki.knotvideoeditor.utils.interfaces.FFMpegCallback
 import kotlinx.android.synthetic.main.fragment_video_trim.view.*
@@ -49,6 +51,24 @@ class VideoTrimFragment : BottomSheetDialogFragment() ,FFMpegCallback{
         actvStartTime = rootView.findViewById(R.id.actvStartTime)
         actvEndTime = rootView.findViewById(R.id.actvEndTime)
 
+
+        ivDone.setOnClickListener {
+            //output file is generated and send to video processing
+            val outputFile = KnotUtils.createVideoFile(context!!)
+            Log.v(tagName, "outputFile: ${outputFile.absolutePath}")
+
+            VideoEditor.with(context!!)
+                .setType(Constants.VIDEO_TRIM)
+                .setFile(videoFile!!)
+                .setOutputPath(outputFile.path)
+                .setStartTime(actvStartTime?.text.toString())
+                .setEndTime(actvEndTime?.text.toString())
+                .setCallback(this)
+                .main()
+
+            helper?.showLoading(true)
+            dismiss()
+        }
 
         view.iv_close.setOnClickListener {
             dismiss()

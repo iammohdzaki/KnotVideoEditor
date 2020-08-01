@@ -45,6 +45,8 @@ public object Constants {
     const val ADD_ITEMS_IN_STORAGE = 106
     const val MAIN_VIDEO_TRIM = 107
 
+    var TYPE_VIDEO = "video"
+
     val PERMISSION_CAMERA = arrayOf(
         Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.READ_EXTERNAL_STORAGE
@@ -64,7 +66,7 @@ public object Constants {
 
     const val CLIP_ARTS = ".ClipArts"
     const val FONT = ".Font"
-    const val MY_VIDEOS = "MyVideos"
+    const val MY_VIDEOS = "Knot Edited Videos"
 
     const val DATE_FORMAT = "yyyyMMdd_HHmmss"
     const val VIDEO_FORMAT = ".mp4"

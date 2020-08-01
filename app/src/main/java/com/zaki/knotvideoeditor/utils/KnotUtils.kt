@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.FileDataSource
 import java.io.*
+import java.nio.channels.FileChannel
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -22,6 +23,27 @@ import java.util.concurrent.TimeUnit
  */
 
 object KnotUtils {
+
+
+
+    //copy file from one source file to destination file
+    @Throws(IOException::class)
+    fun copyFile(sourceFile: File?, destFile: File) {
+        if (!destFile.parentFile.exists()) destFile.parentFile.mkdirs()
+        if (!destFile.exists()) {
+            destFile.createNewFile()
+        }
+        var source: FileChannel? = null
+        var destination: FileChannel? = null
+        try {
+            source = FileInputStream(sourceFile).channel
+            destination = FileOutputStream(destFile).channel
+            destination.transferFrom(source, 0, source.size())
+        } finally {
+            source?.close()
+            destination?.close()
+        }
+    }
 
     fun secToTime(totalSeconds: Long): String {
         return String.format(
@@ -120,6 +142,19 @@ object KnotUtils {
 
         }
     }
+
+    fun refreshGallery(path: String, context: Context) {
+
+        val file = File(path)
+        try {
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+            val contentUri = Uri.fromFile(file)
+            mediaScanIntent.data = contentUri
+            context.sendBroadcast(mediaScanIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
 
 class VideoFrom {
@@ -128,4 +163,6 @@ class VideoFrom {
         const val REMOTE = "REMOTE"
     }
 }
+
+
 
